@@ -67,11 +67,13 @@ describe User do
     it { should_not be_valid }
   end
 
-  describe 'when an email address has upper case letters and is then saved' do
-    it 'should be converted to downcase' do
-      @user.email.upcase!
+  describe 'when an email address has mixed case' do
+    let(:mixed_case_email) { "Foo@ExAMPle.CoM" }
+
+    it 'should be saved as all lower-case' do
+      @user.email = mixed_case_email
       @user.save
-      expect(@user.email).to match @user.email.downcase
+      expect(@user.email).to eql(mixed_case_email.downcase)
     end
   end
 

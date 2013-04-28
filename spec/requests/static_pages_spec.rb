@@ -17,6 +17,43 @@ describe 'Static pages' do
 
     it_should_behave_like 'all static pages'
     it { should_not have_title('| Home') }
+
+
+    describe "for signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+        FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
+        FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
+        sign_in user
+      end
+
+      it "should render the user's feed" do
+        visit root_path
+        user.feed.each do |item|
+          expect(page).to have_selector("li##{item.id}", text: item.content)
+        end
+      end
+
+      describe "micropost count and pluralization" do
+        it "should be accurate for 2 microposts" do
+          visit root_path
+          expect(page).to have_content("2 microposts")
+        end
+
+        it "should be accurate for 1 micropost" do
+          user.microposts.last.destroy
+          visit root_path
+          expect(page).to have_content("1 micropost")
+          expect(page).to_not have_content("1 microposts")
+        end
+
+        it "should be accurate for no microposts" do
+          user.microposts.destroy_all
+          visit root_path
+          expect(page).to have_content("0 microposts")
+        end
+      end
+    end
   end
 
   describe 'Help page' do
